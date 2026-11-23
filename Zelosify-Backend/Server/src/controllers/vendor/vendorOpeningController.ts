@@ -273,18 +273,8 @@ export async function uploadVendorProfiles(req: Request, res: Response) {
           filename: sanitized,
         });
       }
-    } else if (req.body.profiles && Array.isArray(req.body.profiles)) {
-      // Direct key submission from presigned upload flow
-      for (const p of req.body.profiles) {
-        if (p.s3Key) {
-          itemsToCreate.push({
-            s3Key: p.s3Key,
-            filename: p.filename || p.s3Key.split("/").pop() || "candidate_profile",
-          });
-        }
-      }
     } else {
-      return res.status(400).json({ message: "No files or profile keys uploaded" });
+      return res.status(400).json({ message: "No candidate profile files uploaded" });
     }
 
     if (itemsToCreate.length === 0) {

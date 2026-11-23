@@ -7,18 +7,11 @@ import multer from "multer";
 
 /**
  * Allowed MIME types for file uploads
- * Supports documents, presentations, images, and text files
+ * Supports the resume formats required by the contract-hiring workflow.
  */
 const ALLOWED_MIME_TYPES = [
   "application/pdf",
-  "application/msword",
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-  "application/vnd.ms-powerpoint",
   "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-  "text/plain",
-  "image/jpeg",
-  "image/png",
-  "image/jpg",
 ] as const;
 
 /**
@@ -39,7 +32,7 @@ const fileFilter: multer.Options["fileFilter"] = (req, file, cb) => {
   } else {
     cb(
       new Error(
-        "Invalid file type. Only PDF, DOC, DOCX, PPT, PPTX, TXT, JPG, JPEG, PNG files are allowed."
+        "Invalid file type. Only PDF and PPTX candidate profiles are allowed."
       )
     );
   }
