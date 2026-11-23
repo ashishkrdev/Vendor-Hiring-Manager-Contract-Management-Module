@@ -1,8 +1,13 @@
 import crypto from "crypto";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 // Encryption and Decryption Keys (store securely in environment variables)
-const ALGORITHM = process.env.ENCRYPTION_ALGORITHM!;
-const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY!; // 32 bytes key
+const ALGORITHM = process.env.ENCRYPTION_ALGORITHM || "aes-256-gcm";
+const ENCRYPTION_KEY =
+  process.env.ENCRYPTION_KEY ||
+  "8939bdfd2c3d1882977a6679d0d3471f718dabba53980be288e82b6e76e93db9";
 
 // Encrypt function
 export const encrypt = (text: string): string => {

@@ -49,39 +49,10 @@ export function middleware(request) {
 
   // Special case: Registration flow
   if (isRegistering) {
-    // If user has registration token, they must complete TOTP setup
     if (path !== "/setup-totp") {
       return NextResponse.redirect(new URL("/setup-totp", request.url));
     }
     return response;
-  }
-
-  // Redirect logged in users away from public pages except during registration
-  if (isPublicPath && isAuthenticated) {
-    // Role-based redirection
-    console.log("User Role = ", userRole);
-    switch (userRole) {
-      case "VENDOR_MANAGER":
-        console.log(`Redirecting VENDOR_MANAGER to /user`);
-        return NextResponse.redirect(new URL("/user", request.url));
-
-      case "BUSINESS_USER":
-        console.log(
-          `Redirecting BUSINESS_USER to /business-user/digital-initiative`
-        );
-        return NextResponse.redirect(
-          new URL("/business-user/digital-initiative", request.url)
-        );
-
-      case "IT_VENDOR":
-        console.log(`Redirecting IT_VENDOR to /vendor/payments`);
-        return NextResponse.redirect(new URL("/vendor/payments", request.url));
-
-      default:
-        // Fallback for unknown roles or missing role - redirect to base user page
-        console.log(`Unknown role (${userRole}) - redirecting to /`);
-        return NextResponse.redirect(new URL("/", request.url));
-    }
   }
 
   // Redirect unauthenticated users to login page
@@ -89,15 +60,47 @@ export function middleware(request) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
+  // Redirect logged in users away from public pages
+  if (isPublicPath && isAuthenticated) {
+    switch (userRole) {
+      case "HIRING_MANAGER":
+        return NextResponse.redirect(new URL("/hiring-manager/openings", request.url));
+
+      case "IT_VENDOR":
+        return NextResponse.redirect(new URL("/vendor/openings", request.url));
+
+      case "VENDOR_MANAGER":
+        return NextResponse.redirect(new URL("/user", request.url));
+
+      case "BUSINESS_USER":
+        return NextResponse.redirect(
+          new URL("/business-user/digital-initiative", request.url)
+        );
+
+      default:
+        return NextResponse.redirect(new URL("/", request.url));
+    }
+  }
+
+  // Route-level role guards
+  if (path.startsWith("/hiring-manager") && userRole !== "HIRING_MANAGER") {
+    return NextResponse.redirect(new URL("/login", request.url));
+  }
+
+  if (path.startsWith("/vendor") && userRole !== "IT_VENDOR" && userRole !== "VENDOR_MANAGER") {
+    return NextResponse.redirect(new URL("/login", request.url));
+  }
+
   return response;
 }
 
-// Configure middleware to run only on specific paths
+// Configure middleware to run on specific paths
 export const config = {
   matcher: [
     // Protected routes
     "/user/:path*",
     "/vendor/:path*",
+    "/hiring-manager/:path*",
     "/business-user/:path*",
 
     // Public paths for redirect logic
